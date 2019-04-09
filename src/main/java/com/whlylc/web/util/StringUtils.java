@@ -46,7 +46,7 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
      * String. E.g. useful for {@code toString()} implementations.
      *
      * @param coll  the Collection to display
-     * @param delim the delimiter to use (probably a ",")
+     * @param delimiter the delimiter to use (probably a ",")
      * @return the delimited String
      */
     public static String collectionToDelimitedString(Collection<?> coll, String delimiter) {
@@ -93,7 +93,6 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
      * @return an array of the tokens
      * @see StringTokenizer
      * @see String#trim()
-     * @see #delimitedListToStringArray
      */
     public static List<String> tokenizeToStringList(String str, String delimiters) {
         return tokenizeToStringList(str, delimiters, true, true);
@@ -117,7 +116,6 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
      * was {@code null})
      * @see StringTokenizer
      * @see String#trim()
-     * @see #delimitedListToStringArray
      */
     public static List<String> tokenizeToStringList(
             String str, String delimiters, boolean trimTokens, boolean ignoreEmptyTokens) {
