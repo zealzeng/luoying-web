@@ -458,6 +458,9 @@ public class ResourceConcat {
                 response.addHeader("Content-Encoding", "gzip");
                 outputStream = new GZIPOutputStream(outputStream);
             }
+            else {
+                response.setContentLength((int) concatResource.getContentLength());
+            }
             byte[] line = new byte[]{'\r', '\n'};
             byte[] buffer = new byte[1024];
             int readCount = 0;

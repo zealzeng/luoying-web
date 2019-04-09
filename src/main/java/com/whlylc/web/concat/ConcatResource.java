@@ -56,6 +56,8 @@ public class ConcatResource {
         long totalLength = 0;
         for (WebResource resource : resources) {
             totalLength += resource.getContentLength();
+            //Append \r\n
+            totalLength += 2;
         }
         return totalLength;
     }
