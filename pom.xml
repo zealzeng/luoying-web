@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.whlylc</groupId>
     <artifactId>luoying-web</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
     <name>Luoying web</name>
     <description>Luoying web framework</description>
     <url>https://github.com/zealzeng/luoying-web</url>
