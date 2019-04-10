@@ -4,6 +4,8 @@
 package com.whlylc.web.util;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * String utility functions
@@ -137,5 +139,20 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
         return tokens;
     }
 
+    public static void main(String[] args) throws Exception {
+        String css = "background-image: url(../img/video.png)";
+        css = "background-image: url('../img/video.png)";
+//        Pattern CSS_URL_PATTERN = Pattern.compile("url\\([\\s]*['\"]?((?!['\"]?https?://|['\"]?data:|['\"]?/).*?)['\"]?[\\s]*\\)");
+        Pattern CSS_URL_PATTERN = Pattern.compile("url\\([\\s]*['\"]?((?!https?://|data:|/).*?)['\"]?[\\s]*\\)");
+//        Pattern CSS_URL_PATTERN = Pattern.compile("url\\([\\s]*['\"]?((?!https?://|data:|/).*)['\"]?[\\s]*\\)");
+        Matcher matcher = CSS_URL_PATTERN.matcher(css);
+        StringBuffer sb = new StringBuffer();
+        while (matcher.find()) {
+            String url = matcher.group(1).trim();
+            matcher.appendReplacement(sb, "*" + url);
+        }
+        matcher.appendTail(sb);
+        System.out.println(sb.toString());
+    }
 
 }
