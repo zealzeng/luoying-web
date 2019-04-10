@@ -99,8 +99,9 @@ public class ResourceConcat {
         watcher = FileSystems.getDefault().newWatchService();
         Path[] paths = null;
         if (resourcePaths == null || resourcePaths.length <= 0) {
-            paths = new Path[]{rootPath};
+            paths = new Path[]{ rootPath };
         } else {
+            paths = new Path[resourcePaths.length];
             for (int i = 0; i < resourcePaths.length; ++i) {
                 paths[i] = Paths.get(rootDir, resourcePaths[i]);
             }
