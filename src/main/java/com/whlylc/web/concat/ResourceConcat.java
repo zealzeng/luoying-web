@@ -231,6 +231,11 @@ public class ResourceConcat {
             return;
         }
         String concatResourcePath = queryString.trim();
+        //First token as concat resource path
+        int index = concatResourcePath.indexOf('&');
+        if (index != -1) {
+            concatResourcePath = concatResourcePath.substring(0, index).trim();
+        }
         ConcatResource concatResource = this.concatResourceCache.get(concatResourcePath);
         if (concatResource == null) {
             concatResource = this.loadConcatResource(request, concatResourcePath);
@@ -546,6 +551,9 @@ public class ResourceConcat {
                 WebResource resource = resourceCache.get(resourcePath);
                 if (resource == null) {
                     resource = this.loadWebResource(request, resourcePath);
+                    if (resource == null) {
+                        continue;
+                    }
                     if (resource.getContentLength() > 0 && "css".equals(resource.getResourceExtension())) {
                         if (contextPath == null) {
                             contextPath = this.getContextPath(request);
@@ -567,16 +575,18 @@ public class ResourceConcat {
      *
      * @param request
      * @param resourcePath
-     * @return
+     * @return If there's errors return null
      */
     private WebResource loadWebResource(HttpServletRequest request, String resourcePath) {
         File file = new File(request.getServletContext().getRealPath(resourcePath));
         String extName = FilenameUtils.getExtension(file.getName());
         if (!"js".equals(extName) && !"css".equals(extName)) {
-            throw new IllegalStateException("Access is denied");
+            logger.warn("Unsupported resource file " + resourcePath);
+            return null;
         }
         if (resourcePath.contains("WEB-INF")) {
-            throw new IllegalStateException("Access is denied");
+            logger.warn("Invalid resource file " + resourcePath);
+            return null;
         }
         WebResource resource = new WebResource();
         resource.setResourcePath(resourcePath);
@@ -594,7 +604,7 @@ public class ResourceConcat {
             content = FileUtils.readFileToByteArray(file);
         } catch (IOException e) {
             logger.warn("Failed to read " + file.getAbsolutePath());
-            return resource;
+            return null;
         }
         resource.setContent(content);
         return resource;
