@@ -52,7 +52,7 @@ public class ResourceConcat {
     private Map<String, WebResource> resourceCache = new ConcurrentHashMap<>();
 
     //Concat resource cache
-    private Map<String, ConcatResource> concatResourceCache = new ConcurrentHashMap<>();
+    //private Map<String, ConcatResource> concatResourceCache = new ConcurrentHashMap<>();
 
     //Stop flag of watching thread
     private volatile boolean stopResourceWatcher = false;
@@ -238,9 +238,14 @@ public class ResourceConcat {
         if (index != -1) {
             concatResourcePath = concatResourcePath.substring(0, index).trim();
         }
-        ConcatResource concatResource = this.concatResourceCache.get(concatResourcePath);
+//        ConcatResource concatResource = this.concatResourceCache.get(concatResourcePath);
+//        if (concatResource == null) {
+//            concatResource = this.loadConcatResource(request, concatResourcePath);
+//        }
+        ConcatResource concatResource = this.loadConcatResource(request, concatResourcePath);
         if (concatResource == null) {
-            concatResource = this.loadConcatResource(request, concatResourcePath);
+            //Do nothing
+            return;
         }
         //ETag is not modified
         if (!checkIfHeaders(request, response, concatResource)) {
@@ -525,7 +530,7 @@ public class ResourceConcat {
      *
      * @param request
      * @param concatResourcePath
-     * @return
+     * @return null if no resource
      */
     private ConcatResource loadConcatResource(HttpServletRequest request, String concatResourcePath) {
 
@@ -567,8 +572,12 @@ public class ResourceConcat {
                 resources.add(resource);
             }
         }
+        if (resources.size() <= 0) {
+            logger.warn("No resource at all " + concatResourcePath);
+            return null;
+        }
         concatResource.setResources(resources);
-        this.concatResourceCache.put(concatResourcePath, concatResource);
+        //this.concatResourceCache.put(concatResourcePath, concatResource);
         return concatResource;
     }
 

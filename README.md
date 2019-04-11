@@ -6,7 +6,7 @@ Luoying web framework contains a bundle of components to improve J2EE developmen
 <dependency>
   <groupId>com.whlylc</groupId>
   <artifactId>luoying-web</artifactId>
-  <version>0.1.1</version>
+  <version>0.1.4</version>
 </dependency>
 ```
 
