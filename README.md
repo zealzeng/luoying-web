@@ -12,11 +12,56 @@ Luoying web framework contains a bundle of components to improve J2EE developmen
 
 ## http concat组件
 主流的http1.1算是短连接,合并js,css为单个文件,使用浏览器缓存,gzip传输等手段能有效的减少浏览器
-和服务器的交互次数和减小传输数据,在有限的资源下可以提高一下网站响应速度和负载。没一定规模的开发
+和服务器的交互次数和减小传输数据,在有限的资源下可以提高一下网站响应速度和负载。小开发
 团队折腾不起前后端分离,享受不到大前端webpack,gulp带来的福利, 阿里的nginx concat可惜只支持本地文件,
 做反向代理时无能为力, MVC后端的写页面不讲究,是有一些开源的组件是可以合并js和css,但不尽人意,多个css
-的url语法的相对路径没处理,不支持ETag缓存,gzip, 线上修改不支持更新等等, 所以造了luoying concat这个轮子。
+的url语法的相对路径没处理,不支持ETag缓存,gzip, 没考虑热更新等, 所以造了luoying concat这个轮子。
 
+ConcatServlet使用例子
+```java
+package com.whlylc.web.concat;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
+/**
+ * Created by Zeal on 2019/4/9 0009.
+ */
+public class ConcatServlet extends HttpServlet {
+
+    private ResourceConcat resourceConcat = null;
+
+    @Override
+    public void init() throws ServletException {
+        ServletContext servletContext = this.getServletContext();
+        resourceConcat = new ResourceConcat();
+        //默认不开启gzip,资源文件超过最小值(这里设置10K)才生效
+        resourceConcat.setCompressionMinSize(10 * 1024);
+        //资源文件最好能统一个编码,建议为默认的UTF-8
+        resourceConcat.setResourceEncoding(StandardCharsets.UTF_8);
+        //开启gzip时使用的Transfer-Encoding为chunked,无gzip时Content-Length才设置,这个参数通常不用设置
+        //resourceConcat.setResponseBufferSize(10 * 1024);
+        try {
+            //开启资源文件监控,使用NIO WatchService,可实时更新内存中的缓存的资源文件内容,默认采访过的js,css加载到内存.
+            //watchResources()方法不指定特定目录则监控除去WEB-INF外的所有文件夹
+            resourceConcat.watchResources(this.getServletContext(), "/js", "/css");
+        } catch (IOException e) {
+            throw new ServletException(e);
+        }
+    }
+
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        resourceConcat.concat(req, resp);
+    }
+
+}
+
+```
 
  
  

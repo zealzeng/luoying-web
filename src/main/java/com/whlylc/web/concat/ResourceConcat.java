@@ -122,7 +122,7 @@ public class ResourceConcat {
                 }
             });
         }
-        this.watcherThread = new ResourceWatcher(rootPath);
+        this.watcherThread = new ResourceWatcher(rootPath, this.getContextPath(servletContext));
         this.stopResourceWatcher = false;
         this.watcherThread.start();
         return this;
@@ -151,9 +151,11 @@ public class ResourceConcat {
     private class ResourceWatcher extends Thread {
 
         private Path rootPath = null;
+        private String contextPath = null;
 
-        public ResourceWatcher(Path rootPath) {
+        public ResourceWatcher(Path rootPath, String contextPath) {
             this.rootPath = rootPath;
+            this.contextPath = contextPath;
         }
 
         public void run() {
@@ -191,10 +193,16 @@ public class ResourceConcat {
                                     continue;
                                 }
                                 if (create || modify) {
-                                    byte[] bytes = Files.readAllBytes(path);
-                                    resource.setContent(bytes);
-                                    resource.setContentLength(bytes.length);
-                                    resource.setLastModified(newLastTime);
+                                    WebResource newResource = loadWebResource(path.toFile(), resourcePath);
+                                    if (newResource != null) {
+                                        if ("css".equalsIgnoreCase(newResource.getResourceExtension())) {
+                                            fixCssUrl(newResource, contextPath);
+                                        }
+                                        //byte[] bytes = Files.readAllBytes(path);
+                                        resource.setContent(newResource.getContent());
+                                        resource.setContentLength(newResource.getContentLength());
+                                        resource.setLastModified(newResource.getLastModified());
+                                    }
                                 } else {
                                     resource.setContent(new byte[]{});
                                     resource.setContentLength(0);
@@ -518,7 +526,14 @@ public class ResourceConcat {
      * @return
      */
     private String getContextPath(HttpServletRequest request) {
-        String contextPath = request.getContextPath();
+        return this.getContextPath(request.getContextPath());
+    }
+
+    private String getContextPath(ServletContext servletContext) {
+        return this.getContextPath(servletContext.getContextPath());
+    }
+
+    private String getContextPath(String contextPath) {
         if (contextPath.length() == 1 && contextPath.charAt(0) == '/') {
             contextPath = "";
         }
@@ -584,13 +599,16 @@ public class ResourceConcat {
     /**
      * Load web resource
      *
-     * @param request
-     * @param resourcePath
+     * @param resourceFile
      * @return If there's errors return null
      */
-    private WebResource loadWebResource(HttpServletRequest request, String resourcePath) {
-        File file = new File(request.getServletContext().getRealPath(resourcePath));
-        String extName = FilenameUtils.getExtension(file.getName());
+    private WebResource loadWebResource(File resourceFile, String resourcePath) {
+        if (!resourceFile.exists() || !resourceFile.isFile()) {
+            logger.warn("Resource file " + resourceFile.getAbsolutePath() + " does not exist or not file");
+            return null;
+        }
+        //String resourcePath = resourceFile.getAbsolutePath();
+        String extName = FilenameUtils.getExtension(resourceFile.getName());
         if (!"js".equals(extName) && !"css".equals(extName)) {
             logger.warn("Unsupported resource file " + resourcePath);
             return null;
@@ -601,24 +619,33 @@ public class ResourceConcat {
         }
         WebResource resource = new WebResource();
         resource.setResourcePath(resourcePath);
-        resource.setResourceName(file.getName());
+        resource.setResourceName(resourceFile.getName());
         resource.setResourceExtension(extName);
-        if (!file.exists() || !file.isFile()) {
-            return resource;
-        }
-        resource.setContentLength(file.length());
-        resource.setLastModified(file.lastModified());
+        resource.setContentLength(resourceFile.length());
+        resource.setLastModified(resourceFile.lastModified());
         resource.setResourceEncoding(this.resourceEncoding);
         byte[] content = null;
         try {
             //jsContent = FileUtils.readFileToString(file, this.resourceEncoding);
-            content = FileUtils.readFileToByteArray(file);
+            content = FileUtils.readFileToByteArray(resourceFile);
         } catch (IOException e) {
-            logger.warn("Failed to read " + file.getAbsolutePath());
+            logger.warn("Failed to read " + resourceFile.getAbsolutePath());
             return null;
         }
         resource.setContent(content);
         return resource;
+    }
+
+    /**
+     * Load web resource
+     *
+     * @param request
+     * @param resourcePath
+     * @return If there's errors return null
+     */
+    private WebResource loadWebResource(HttpServletRequest request, String resourcePath) {
+        File file = new File(request.getServletContext().getRealPath(resourcePath));
+        return loadWebResource(file, resourcePath);
     }
 
     /**
