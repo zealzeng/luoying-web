@@ -159,4 +159,12 @@ public class ConcatCtrl {
     }
 }
 ```
+
+## 采访例子
+http://localhost:8080/jscss?/path1/a.js,b.js;/path2/c.js,d.js
+
+## 运行环境
+暂时只在tomcat下通过,依赖于ServletContext.getRealPath()和HttpServletRequest.getRealPath()获取部署应用的路径,
+可能在其它servlet服务器会有差异,有需要再完善。
+
 Enjoy it!
