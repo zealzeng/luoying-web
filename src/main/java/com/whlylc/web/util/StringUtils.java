@@ -142,8 +142,9 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
     public static void main(String[] args) throws Exception {
         String css = "background-image: url(../img/video.png)";
         css = "background-image: url('../img/video.png)";
-//        Pattern CSS_URL_PATTERN = Pattern.compile("url\\([\\s]*['\"]?((?!['\"]?https?://|['\"]?data:|['\"]?/).*?)['\"]?[\\s]*\\)");
-        Pattern CSS_URL_PATTERN = Pattern.compile("url\\([\\s]*['\"]?((?!https?://|data:|/).*?)['\"]?[\\s]*\\)");
+        css = "background: #FAFAFA url('http://i.imgur.com/R60qKwS.jpg')";
+        Pattern CSS_URL_PATTERN = Pattern.compile("url\\([\\s]*['\"]?((?!['\"]?https?://|['\"]?data:|['\"]?/).*?)['\"]?[\\s]*\\)");
+//        Pattern CSS_URL_PATTERN = Pattern.compile("url\\([\\s]*['\"]?((?!https?://|data:|/).*?)['\"]?[\\s]*\\)");
 //        Pattern CSS_URL_PATTERN = Pattern.compile("url\\([\\s]*['\"]?((?!https?://|data:|/).*)['\"]?[\\s]*\\)");
         Matcher matcher = CSS_URL_PATTERN.matcher(css);
         StringBuffer sb = new StringBuffer();

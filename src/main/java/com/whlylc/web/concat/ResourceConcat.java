@@ -36,9 +36,9 @@ public class ResourceConcat {
     //Logger
     private static final Logger logger = LogManager.getLogger(ResourceConcat.class);
 
-    //private static final Pattern CSS_URL_PATTERN = Pattern.compile("url\\([\\s]*['\"]?((?!['\"]?https?://|['\"]?data:|['\"]?/).*?)['\"]?[\\s]*\\)");
+    private static final Pattern CSS_URL_PATTERN = Pattern.compile("url\\([\\s]*['\"]?((?!['\"]?https?://|['\"]?data:|['\"]?/).*?)['\"]?[\\s]*\\)");
 
-    private static final Pattern CSS_URL_PATTERN = Pattern.compile("url\\([\\s]*['\"]?((?!https?://|data:|/).*?)['\"]?[\\s]*\\)");
+    //private static final Pattern CSS_URL_PATTERN = Pattern.compile("url\\([\\s]*['\"]?((?!https?://|data:|/).*?)['\"]?[\\s]*\\)");
 
     private Charset resourceEncoding = StandardCharsets.UTF_8;
 
