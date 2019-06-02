@@ -185,14 +185,22 @@ public class ResourceConcat {
                             }
                             WebResource resource = resourceCache.get(resourcePath);
                             if (resource != null) {
-                                long newLastTime = Files.getLastModifiedTime(path).toMillis();
-                                long oldLastTime = resource.getLastModified();
-                                //logger.info("oldTime=" + oldLastTime + " ,newTime=" + newLastTime);
-                                //Timestamp is not changed
-                                if (newLastTime == oldLastTime) {
-                                    continue;
+                                if (delete) {
+                                    resourceCache.remove(resourcePath);
                                 }
-                                if (create || modify) {
+                                else {
+                                    //When it's deleting event, can not get the modified time since the file is gone
+                                    try {
+                                        long newLastTime = Files.getLastModifiedTime(path).toMillis();
+                                        long oldLastTime = resource.getLastModified();
+                                        //Timestamp is not changed, to avoid some duplicated events
+                                        if (newLastTime == oldLastTime) {
+                                            continue;
+                                        }
+                                    }
+                                    catch (Exception e) {
+                                        logger.warn("Failed to get last modified time " + resourcePath, e);
+                                    }
                                     WebResource newResource = loadWebResource(path.toFile(), resourcePath);
                                     if (newResource != null) {
                                         if ("css".equalsIgnoreCase(newResource.getResourceExtension())) {
@@ -203,20 +211,23 @@ public class ResourceConcat {
                                         resource.setContentLength(newResource.getContentLength());
                                         resource.setLastModified(newResource.getLastModified());
                                     }
-                                } else {
-                                    resource.setContent(new byte[]{});
-                                    resource.setContentLength(0);
-                                    resource.setLastModified(newLastTime);
+//                                    else {
+//                                        resource.setContent(new byte[]{});
+//                                        resource.setContentLength(0);
+//                                        resource.setLastModified(newLastTime);
+//                                    }
                                 }
                             }
                         } else {
                             //FIXME How to handle overflow event? Just ignore it right now
-                            logger.warn("Overflow event, " + event.context());
+                            logger.warn("Ignore the overflow event, " + event.context());
                         }
                     }
-                } catch (Throwable t) {
+                }
+                catch (Throwable t) {
                     logger.error("Failed to handle watch service event", t);
-                } finally {
+                }
+                finally {
                     if (key != null) {
                         key.reset();
                     }
