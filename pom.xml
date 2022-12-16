@@ -41,7 +41,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <log4j2.version>2.11.1</log4j2.version>
-        <spring.version>4.3.21.RELEASE</spring.version>
+        <spring.version>5.2.20.RELEASE</spring.version>
     </properties>
 
     <build>
